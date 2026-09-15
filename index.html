@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Study Reminder</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --bg: #07080c;
+            --glass: rgba(255, 255, 255, 0.055);
+            --glass-border: rgba(255, 255, 255, 0.11);
+            --text: #f5f5f7;
+            --muted: #8d9099;
+            --accent: #ff6b35;
+            --accent-2: #ff9b62;
+        }
+
+        html,
+        body {
+            width: 100%;
+            min-height: 100%;
+        }
+
+        body {
+            min-height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text);
+            background:
+                radial-gradient(circle at 20% 20%, rgba(255, 107, 53, 0.10), transparent 30%),
+                radial-gradient(circle at 80% 75%, rgba(255, 155, 98, 0.07), transparent 30%),
+                var(--bg);
+        }
+
+        /* Ambient background */
+
+        .orb {
+            position: fixed;
+            width: 420px;
+            height: 420px;
+            border-radius: 50%;
+            pointer-events: none;
+            filter: blur(100px);
+            opacity: 0.16;
+            animation: float 10s ease-in-out infinite alternate;
+        }
+
+        .orb.one {
+            background: #ff5a1f;
+            top: -180px;
+            left: -120px;
+        }
+
+        .orb.two {
+            background: #ff8a50;
+            right: -170px;
+            bottom: -190px;
+            animation-delay: -4s;
+        }
+
+        @keyframes float {
+            from {
+                transform: translate3d(0, 0, 0) scale(1);
+            }
+
+            to {
+                transform: translate3d(35px, 25px, 0) scale(1.12);
+            }
+        }
+
+        /* Main glass card */
+
+        .container {
+            width: min(92vw, 520px);
+            position: relative;
+            z-index: 2;
+        }
+
+        .glass-card {
+            position: relative;
+            padding: 42px 38px 38px;
+            border: 1px solid var(--glass-border);
+            border-radius: 30px;
+            background: linear-gradient(
+                145deg,
+                rgba(255, 255, 255, 0.075),
+                rgba(255, 255, 255, 0.025)
+            );
+            backdrop-filter: blur(28px);
+            -webkit-backdrop-filter: blur(28px);
+            box-shadow:
+                0 35px 100px rgba(0, 0, 0, 0.55),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+            animation: appear 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+
+        .glass-card::before {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: linear-gradient(
+                120deg,
+                rgba(255,255,255,0.08),
+                transparent 35%,
+                transparent 70%,
+                rgba(255,255,255,0.025)
+            );
+        }
+
+        @keyframes appear {
+            from {
+                opacity: 0;
+                transform: translateY(24px) scale(0.97);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
+        /* Header */
+
+        .icon {
+            width: 58px;
+            height: 58px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 25px;
+            border-radius: 18px;
+            background: linear-gradient(
+                145deg,
+                rgba(255, 107, 53, 0.20),
+                rgba(255, 107, 53, 0.055)
+            );
+            border: 1px solid rgba(255, 107, 53, 0.22);
+            box-shadow:
+                0 10px 35px rgba(255, 107, 53, 0.08),
+                inset 0 1px 0 rgba(255, 255, 255, 0.08);
+        }
+
+        .icon svg {
+            width: 27px;
+            height: 27px;
+            fill: none;
+            stroke: var(--accent-2);
+            stroke-width: 1.8;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        .eyebrow {
+            color: var(--accent-2);
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 2.4px;
+            text-transform: uppercase;
+            margin-bottom: 11px;
+        }
+
+        h1 {
+            font-size: clamp(31px, 7vw, 42px);
+            line-height: 1.05;
+            letter-spacing: -1.8px;
+            font-weight: 700;
+            margin-bottom: 15px;
+        }
+
+        .description {
+            color: var(--muted);
+            font-size: 15px;
+            line-height: 1.65;
+            max-width: 390px;
+        }
+
+        /* Message preview */
+
+        .message {
+            position: relative;
+            margin-top: 30px;
+            padding: 18px 19px;
+            border-radius: 17px;
+            background: rgba(0, 0, 0, 0.20);
+            border: 1px solid rgba(255, 255, 255, 0.065);
+        }
+
+        .message-label {
+            color: #777b85;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.6px;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .message-text {
+            color: #dfe0e4;
+            font-size: 14px;
+            line-height: 1.55;
+        }
+
+        /* Button */
+
+        .send-button {
+            width: 100%;
+            position: relative;
+            margin-top: 25px;
+            padding: 17px 20px;
+            border: 0;
+            border-radius: 17px;
+            cursor: pointer;
+            overflow: hidden;
+
+            color: #fff;
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 0.2px;
+
+            background: linear-gradient(
+                135deg,
+                #ff5d28,
+                #e94819
+            );
+
+            box-shadow:
+                0 12px 35px rgba(255, 82, 30, 0.20),
+                inset 0 1px 0 rgba(255, 255, 255, 0.22);
+
+            transition:
+                transform 0.2s ease,
+                box-shadow 0.2s ease,
+                filter 0.2s ease;
+        }
+
+        .send-button::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -120%;
+            width: 70%;
+            height: 100%;
+            transform: skewX(-20deg);
+            background: linear-gradient(
+                90deg,
+                transparent,
+                rgba(255,255,255,0.18),
+                transparent
+            );
+            transition: left 0.65s ease;
+        }
+
+        .send-button:hover {
+            transform: translateY(-2px);
+            filter: brightness(1.08);
+            box-shadow:
+                0 17px 45px rgba(255, 82, 30, 0.28),
+                inset 0 1px 0 rgba(255, 255, 255, 0.24);
+        }
+
+        .send-button:hover::before {
+            left: 150%;
+        }
+
+        .send-button:active {
+            transform: translateY(1px) scale(0.985);
+            box-shadow:
+                0 8px 20px rgba(255, 82, 30, 0.18),
+                inset 0 2px 5px rgba(0, 0, 0, 0.12);
+        }
+
+        .button-content {
+            position: relative;
+            z-index: 2;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .button-content svg {
+            width: 18px;
+            height: 18px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+        }
+
+        /* Status */
+
+        .status {
+            min-height: 22px;
+            margin-top: 17px;
+            text-align: center;
+            color: #737781;
+            font-size: 12px;
+            transition:
+                color 0.25s ease,
+                opacity 0.25s ease;
+        }
+
+        .status.success {
+            color: #8fd9ae;
+        }
+
+        .status.error {
+            color: #ff8d7b;
+        }
+
+        /* Footer */
+
+        .footer {
+            margin-top: 22px;
+            text-align: center;
+            color: #555861;
+            font-size: 10px;
+            letter-spacing: 0.8px;
+        }
+
+        /* Mobile */
+
+        @media (max-width: 520px) {
+            .glass-card {
+                padding: 31px 24px 27px;
+                border-radius: 25px;
+            }
+
+            .icon {
+                width: 52px;
+                height: 52px;
+                border-radius: 16px;
+            }
+
+            h1 {
+                letter-spacing: -1.3px;
+            }
+
+            .description {
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="orb one"></div>
+    <div class="orb two"></div>
+
+    <main class="container">
+        <section class="glass-card">
+
+            <div class="icon">
+                <svg viewBox="0 0 24 24">
+                    <path d="M12 6v6l4 2"></path>
+                    <circle cx="12" cy="12" r="9"></circle>
+                </svg>
+            </div>
+
+            <div class="eyebrow">Study Protocol</div>
+
+            <h1>Time to get back.</h1>
+
+            <p class="description">
+                Send yourself a reminder through Telegram whenever
+                you need a small push back toward your work.
+            </p>
+
+            <div class="message">
+                <div class="message-label">Telegram message</div>
+
+                <div class="message-text">
+                    This is a study reminder. Please get back to studying.
+                </div>
+            </div>
+
+            <button class="send-button" id="sendButton">
+                <span class="button-content">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M22 2L11 13"></path>
+                        <path d="M22 2L15 22L11 13L2 9L22 2Z"></path>
+                    </svg>
+
+                    <span id="buttonText">Send Reminder</span>
+                </span>
+            </button>
+
+            <div class="status" id="status"></div>
+
+            <div class="footer">
+                PERSONAL STUDY SYSTEM
+            </div>
+
+        </section>
+    </main>
+
+    <script>
+        /*
+         * ============================================================
+         * TELEGRAM SETTINGS
+         * ============================================================
+         *
+         * Replace YOUR_CHAT_ID_HERE with your actual numeric
+         * Telegram chat ID.
+         *
+         * IMPORTANT:
+         * The bot token below is the token you supplied.
+         * If you regenerate your token later, replace it here.
+         */
+
+        const BOT_TOKEN = "8955064380:AAErZShu92GZqTGeJyfghXeazLYHXcOdg";
+
+        const CHAT_ID = "YOUR_CHAT_ID_HERE";
+
+        const MESSAGE =
+            "This is a study reminder. Please get back to studying.";
+
+
+        /*
+         * ============================================================
+         * BUTTON
+         * ============================================================
+         */
+
+        const sendButton = document.getElementById("sendButton");
+        const buttonText = document.getElementById("buttonText");
+        const status = document.getElementById("status");
+
+
+        sendButton.addEventListener("click", function () {
+
+            /*
+             * Prevent another click while the request is being sent.
+             */
+
+            sendButton.disabled = true;
+
+            buttonText.textContent = "Sending...";
+            status.textContent = "";
+            status.className = "status";
+
+
+            /*
+             * Telegram's sendMessage method.
+             *
+             * An Image request is used here instead of fetch().
+             * This allows the request to be made directly from a
+             * locally opened HTML file without needing a backend.
+             */
+
+            const telegramURL =
+                "https://api.telegram.org/bot" +
+                BOT_TOKEN +
+                "/sendMessage?chat_id=" +
+                encodeURIComponent(CHAT_ID) +
+                "&text=" +
+                encodeURIComponent(MESSAGE);
+
+
+            const request = new Image();
+
+            let completed = false;
+
+
+            /*
+             * If Telegram accepts the request, the image request
+             * receives a response.
+             */
+
+            request.onload = function () {
+
+                if (completed) {
+                    return;
+                }
+
+                completed = true;
+
+                buttonText.textContent = "Reminder Sent";
+
+                status.textContent =
+                    "Your study reminder was sent to Telegram.";
+
+                status.className = "status success";
+
+                setTimeout(function () {
+                    sendButton.disabled = false;
+                    buttonText.textContent = "Send Reminder";
+                }, 2500);
+            };
+
+
+            /*
+             * If the browser reports an error, reset the button.
+             *
+             * Because this is a cross-origin request made from a
+             * local HTML file, the browser may report an error even
+             * when Telegram received the request. Therefore the
+             * button is simply reset rather than claiming that the
+             * message definitely failed.
+             */
+
+            request.onerror = function () {
+
+                if (completed) {
+                    return;
+                }
+
+                completed = true;
+
+                buttonText.textContent = "Try Again";
+
+                status.textContent =
+                    "The request could not be confirmed. Check Telegram.";
+
+                status.className = "status error";
+
+                setTimeout(function () {
+                    sendButton.disabled = false;
+                    buttonText.textContent = "Send Reminder";
+                }, 3000);
+            };
+
+
+            /*
+             * Actually send the request.
+             */
+
+            request.src = telegramURL;
+        });
+    </script>
+
+</body>
+      </html>
